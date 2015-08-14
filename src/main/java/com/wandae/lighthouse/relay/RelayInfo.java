@@ -5,6 +5,9 @@ import java.net.URL;
 
 import javax.inject.Singleton;
 
+/**
+ * Stores relay's address.
+ */
 @Singleton
 public class RelayInfo implements Relay {
 

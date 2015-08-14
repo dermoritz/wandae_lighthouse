@@ -15,6 +15,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import com.wandae.lighthouse.relay.Relay;
+import org.slf4j.Logger;
 
 @Path("/")
 public class RestApi {
@@ -25,11 +26,15 @@ public class RestApi {
 	@Context 
 	private HttpServletRequest request;
 
+	@Inject
+	private Logger log;
+
 	@POST
 	@Consumes(MediaType.TEXT_PLAIN)
 	public Response setRelayEndpoint(String endpoint) {
 		String remoteEndpoint = endpoint.startsWith("/") ? endpoint : "/" + endpoint;
 		relay.setRelayUrl(request.getScheme()+ "://" + request.getRemoteAddr() + ":" + request.getRemotePort() + remoteEndpoint);
+		log.info("set relay address called. New endpoint is: " + getRelay());
 		return Response.created(UriBuilder.fromResource(RestApi.class).build()).build();
 	}
 
@@ -37,8 +42,10 @@ public class RestApi {
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response getRelay() {
 		if (relay.getRelayUrl() == null) {
+			log.warn("getRelay called but no relay addres set yet. Is relay running?");
 			return Response.status(Status.NOT_FOUND).build();
 		} else{
+			log.debug(request.getRemoteHost() + " asked for relay address.");
 			return Response.ok(relay.getRelayUrl()).build();
 		}
 	}
